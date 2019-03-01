@@ -1,0 +1,10 @@
+1. Stop word removal and stemming using Porter
+2. Lexical Features:We compute different similarity measures between the pre-processed questions and use their values as features:
+•Word Overlap:  we compute the word overlap as the proportion of words that appear in both Q1 and Q1 and normalize by the length of Q1.
+•Bigram:  we compute the bigram similarity between Q1 and Q2 as the total number of matched bigrams in(Q1,Q2) pair normalized by the number of Q1 bigrams.
+•Best similarity value: the maximum similarity between five similarity measures: Levenshtein, Bigram, Jaccard,Cosine and Word Overlap.
+
+3. Semantic features
+Negation: we use NegEx [21] for identifying negation scope in Q1 and Q2.
+Features from GENIA tagger https://github.com/bornabesic/genia-tagger-py
+Medacy from counting no. of medical entities
