@@ -12,11 +12,13 @@ from nltk.tokenize import word_tokenize
 from nltk.util import ngrams
 import gensim.downloader as api
 from nltk.corpus import wordnet as wn
+from nltk.tag import StanfordNERTagger
 #word_vectors = api.load("glove-wiki-gigaword-100")
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from sklearn import svm
 from sklearn.metrics import accuracy_score
-
+st = StanfordNERTagger('/home/anumeha/Documents/ACL-BioNLP-2019-Shared-Task/RQE/english.all.3class.distsim.crf.ser.gz','/home/anumeha/Documents/ACL-BioNLP-2019-Shared-Task/RQE/stanford-ner.jar',
+encoding='utf-8')
 
 def cleaned_words(myString):
     tokenizer = WordPunctTokenizer()
@@ -39,6 +41,17 @@ def sentiment_analyzer_scores(sentence):
     analyser = SentimentIntensityAnalyzer()
     score = analyser.polarity_scores(sentence)
     return score['neg'],score['pos']
+
+def count_named_entities(text):
+        tokenized_text = word_tokenize(text)
+        classified_text = st.tag(tokenized_text)
+        count=0
+
+        for i in classified_text:
+                if i[1]!='O':
+                        count+=1
+
+        return count
 
 def training_set(tree,x_values,y_values):
     
@@ -63,7 +76,9 @@ def training_set(tree,x_values,y_values):
         neg_faq,pos_faq = sentiment_analyzer_scores(faq)
         neg_val = neg_chq*neg_faq
         pos_val = pos_faq*pos_chq
-        pair_arr = [word_overlap,bigram_overlap,jaccard_sim,neg_val,pos_val]
+        chq_ner = count_named_entities(chq)/len(tokens_chq)
+        faq_ner = count_named_entities(faq)/len(tokens_faq)
+        pair_arr = [word_overlap,bigram_overlap,jaccard_sim,neg_val,pos_val,chq_ner,faq_ner]
         x_values.append(pair_arr)
         
 
