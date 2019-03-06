@@ -140,7 +140,7 @@ def training_set(tree,x_values,y_values):
         vector1 = text_to_vector(sent_chq)
         vector2 = text_to_vector(sent_faq)
         #feature 4: cosine similarity
-        cosine = get_cosine(vector1, vector2)ngramngramngramngramngramngram
+        cosine = get_cosine(vector1, vector2)
         #feature 5: Levenshtein
         lev=levenshtein(sent_chq,sent_faq)
         #feature6: maximum value obtained
@@ -156,7 +156,7 @@ def training_set(tree,x_values,y_values):
         x_values.append(pair_arr)
         print(x_values)
 
-tree = ET.parse('RQE_Train_8588_AMIA2016.xml')
+tree = ET.parse('train.xml')
 y_values = []
 x_values = []
 training_set(tree,x_values,y_values)
@@ -166,7 +166,7 @@ gnb=GaussianNB()
 gnb.fit(x_values,y_values)  
 x_test = []
 y_test = []
-tree_test = ET.parse('RQE_Test_302_pairs_AMIA2016.xml')
+tree_test = ET.parse('test.xml')
 training_set(tree_test,x_test,y_test)
 predicted = gnb.predict(x_test)
 print("Accuracy: ",accuracy_score(predicted,y_test)*100)
