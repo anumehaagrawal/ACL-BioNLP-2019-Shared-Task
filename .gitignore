@@ -104,3 +104,7 @@ venv.bak/
 .mypy_cache/
 
 glove.6B.300d.txt
+*.jar
+*.tar.gz
+pubmed2018_w2v_200D.tar.gz
+pubmed2018_w2v_200D

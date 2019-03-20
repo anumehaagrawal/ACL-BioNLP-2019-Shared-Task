@@ -2,6 +2,8 @@ import pandas as pd
 import xml.etree.ElementTree as ET
 import nltk
 import re, math
+from sklearn import svm
+from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from collections import Counter
 import numpy as np
 from nltk.corpus import stopwords
@@ -19,6 +21,7 @@ from nltk.tag import StanfordNERTagger
 from sklearn import svm
 from sklearn.metrics import accuracy_score
 from sklearn.naive_bayes import GaussianNB, BernoulliNB, MultinomialNB
+from gensim.models import KeyedVectors
 
 WORD = re.compile(r'\w+')
 #nlp = spacy.load('en_core_web_sm')
@@ -74,6 +77,11 @@ def verbs(sentence1,sentence2):
                 if i[0]==j[0]:
                     count+=1
     return count
+
+def sentiment_analyzer_scores(sentence):
+    analyser = SentimentIntensityAnalyzer()
+    score = analyser.polarity_scores(sentence)
+    return score['neg'],score['pos']
 
 def nouns(sentence1,sentence2):
     count=0
@@ -143,16 +151,18 @@ def training_set(tree,x_values,y_values):
         cosine = get_cosine(vector1, vector2)
         #feature 5: Levenshtein
         lev=levenshtein(sent_chq,sent_faq)
-        #feature6: maximum value obtained
-        #doc1=nlp(sent_faq)
-        #doc2=nlp(sent_chq)
 
-        #similarity = doc1.similarity(doc2)
+        word_vectors = KeyedVectors.load_word2vec_format('../pubmed2018_w2v_200D/pubmed2018_w2v_200D.bin', binary=True)
+        similarity = word_vectors.wmdistance(tokens_chq, tokens_faq)
+        neg_chq,pos_chq = sentiment_analyzer_scores(chq)
+        neg_faq,pos_faq = sentiment_analyzer_scores(faq)
+        neg_val = neg_chq*neg_faq
+        pos_val = pos_faq*pos_chq
         average=(word_overlap+bigram_overlap+jaccard_sim+cosine+lev)/6
         question_length_ratio=len(sent_chq)/len(sent_faq)
         common_nouns=nouns(sent_chq,sent_faq)
         common_verbs=verbs(sent_chq,sent_faq)
-        pair_arr = [word_overlap,bigram_overlap,jaccard_sim,cosine,lev,question_length_ratio,common_nouns,common_verbs]
+        pair_arr = [word_overlap,bigram_overlap,jaccard_sim,cosine,lev,question_length_ratio,common_nouns,common_verbs,pos_val,similarity]
         x_values.append(pair_arr)
         print(x_values)
 
@@ -160,10 +170,8 @@ tree = ET.parse('train.xml')
 y_values = []
 x_values = []
 training_set(tree,x_values,y_values)
-x_frame = pd.DataFrame(np.row_stack(x_values))
-y_frame = pd.DataFrame(np.row_stack(y_values))
 gnb=GaussianNB()
-gnb.fit(x_values,y_values)  
+gnb.fit(x_values,y_values) 
 x_test = []
 y_test = []
 tree_test = ET.parse('test.xml')

@@ -22,7 +22,6 @@ from sklearn.metrics import accuracy_score
 st = StanfordNERTagger('/home/anumeha/Documents/ACL-BioNLP-2019-Shared-Task/RQE/english.all.3class.distsim.crf.ser.gz','/home/anumeha/Documents/ACL-BioNLP-2019-Shared-Task/RQE/stanford-ner.jar',
 encoding='utf-8')
 import csv 
-wtr = csv.writer(open ('out.csv', 'w'), delimiter=',', lineterminator='\n')
 def cleaned_words(myString):
     tokenizer = WordPunctTokenizer()
     tokens = tokenizer.tokenize(myString)
@@ -74,17 +73,15 @@ def training_set(tree,x_values,y_values):
         bigram_faq = list(ngrams(tokens_faq, 2)) 
         bigram_overlap = intersection(bigram_chq,bigram_faq)/len(bigram_chq)
         jaccard_sim = get_jaccard_sim(tokens_chq,tokens_faq)
-        similarity = word_vectors.wmdistance(tokens_chq, tokens_faq)
+        #similarity = word_vectors.wmdistance(tokens_chq, tokens_faq)
         neg_chq,pos_chq = sentiment_analyzer_scores(chq)
         neg_faq,pos_faq = sentiment_analyzer_scores(faq)
         neg_val = neg_chq*neg_faq
         pos_val = pos_faq*pos_chq
         chq_ner = count_named_entities(chq)/len(tokens_chq)
         faq_ner = count_named_entities(faq)/len(tokens_faq)
-        pair_arr = [word_overlap,bigram_overlap,jaccard_sim,neg_val,pos_val,chq_ner,faq_ner,similarity]
-        wtr.writerow(pair_arr)
+        pair_arr = [word_overlap,bigram_overlap,jaccard_sim,neg_val,pos_val,chq_ner,faq_ner]   
         x_values.append(pair_arr)
-        print(count)
         count= count +1
         
         
@@ -92,13 +89,19 @@ def training_set(tree,x_values,y_values):
 tree = ET.parse('train.xml')
 y_values = []
 x_values = []
+root = tree.getroot()
+for pair in root.findall('pair'):
+        value = pair.get('value')
+        if(value=="true"):
+                y_values.append(1)
+        else:
+                y_values.append(0)
 training_set(tree,x_values,y_values)
-x_frame = pd.DataFrame(np.row_stack(x_values))
-y_frame = pd.DataFrame(np.row_stack(y_values))
+
 clf = svm.SVC(gamma='scale')
 clf.fit(x_values,y_values)
 print("Training completed")
-dump(clf, 'models.joblib')   
+ 
 x_test = []
 y_test = []
 tree_test = ET.parse('test.xml')
