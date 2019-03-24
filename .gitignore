@@ -108,3 +108,6 @@ glove.6B.300d.txt
 *.tar.gz
 pubmed2018_w2v_200D.tar.gz
 pubmed2018_w2v_200D
+
+pubmed2018_w2v_30D.tar.gz
+pubmed2018_w2v_30D
