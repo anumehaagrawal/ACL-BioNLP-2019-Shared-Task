@@ -13,7 +13,7 @@ from nltk.tag import StanfordNERTagger
 from nltk.tokenize import word_tokenize
 from nltk.util import ngrams
 import gensim.downloader as api
-import spacy
+#import spacy
 from nltk.corpus import wordnet as wn
 from nltk.tag import StanfordNERTagger
 from sklearn import svm
@@ -166,7 +166,8 @@ gnb=GaussianNB()
 gnb.fit(x_values,y_values)  
 x_test = []
 y_test = []
-tree_test = ET.parse('test.xml')
+tree_test = ET.parse('validation.xml')
 training_set(tree_test,x_test,y_test)
 predicted = gnb.predict(x_test)
+print(predicted)
 print("Accuracy: ",accuracy_score(predicted,y_test)*100)

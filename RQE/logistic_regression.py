@@ -13,7 +13,7 @@ from nltk.tag import StanfordNERTagger
 from nltk.tokenize import word_tokenize
 from nltk.util import ngrams
 import gensim.downloader as api
-import spacy
+#import spacy
 from nltk.corpus import wordnet as wn
 from nltk.tag import StanfordNERTagger
 #word_vectors = api.load("glove-wiki-gigaword-100")
@@ -23,7 +23,7 @@ from sklearn.metrics import accuracy_score
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.linear_model import LogisticRegression
 WORD = re.compile(r'\w+')
-nlp = spacy.load('en_core_web_sm')
+#nlp = spacy.load('en_core_web_sm')
 
 
 def cleaned_words(myString):
@@ -147,15 +147,15 @@ def training_set(tree,x_values,y_values):
         #feature 5: Levenshtein
         lev=levenshtein(sent_chq,sent_faq)
         #feature6: maximum value obtained
-        doc1=nlp(sent_faq)
-        doc2=nlp(sent_chq)
+        #doc1=nlp(sent_faq)
+        #doc2=nlp(sent_chq)
 
-        similarity = doc1.similarity(doc2)
+        #similarity = doc1.similarity(doc2)
         average=(word_overlap+bigram_overlap+jaccard_sim+cosine+lev)/6
         question_length_ratio=len(sent_chq)/len(sent_faq)
         common_nouns=nouns(sent_chq,sent_faq)
         common_verbs=verbs(sent_chq,sent_faq)
-        pair_arr = [word_overlap,bigram_overlap,jaccard_sim,cosine,lev,similarity,question_length_ratio,common_nouns,common_verbs]
+        pair_arr = [word_overlap,bigram_overlap,jaccard_sim,cosine,lev,question_length_ratio,common_nouns,common_verbs]
         x_values.append(pair_arr)
         print(x_values)
 
@@ -169,7 +169,17 @@ clf = LogisticRegression(random_state=0, solver='lbfgs',multi_class='multinomial
 clf.fit(x_values,y_values)  
 x_test = []
 y_test = []
-tree_test = ET.parse('test.xml')
+tree_test = ET.parse('validation.xml')
 training_set(tree_test,x_test,y_test)
 predicted = clf.predict(x_test)
+ans_f = []
+count = 1
+for val in predicted:
+    ans= []
+    ans.append(count)
+    ans.append(val)
+    ans_f.append(ans)
+    count=count+1
+df = pd.DataFrame(ans_f)
+df.to_csv('true.csv', encoding='utf-8')
 print("Accuracy: ",accuracy_score(predicted,y_test)*100)

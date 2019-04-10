@@ -3,6 +3,7 @@ import xml.etree.ElementTree as ET
 import nltk
 import re, math
 from sklearn import svm
+from input import arr
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from collections import Counter
 import numpy as np
@@ -15,7 +16,7 @@ from nltk.tag import StanfordNERTagger
 from nltk.tokenize import word_tokenize
 from nltk.util import ngrams
 import gensim.downloader as api
-import spacy
+#import spacy
 from nltk.corpus import wordnet as wn
 from nltk.tag import StanfordNERTagger
 from sklearn import svm
@@ -133,6 +134,7 @@ def training_set(tree,x_values,y_values):
                 y_values.append(1)
         else:
                 y_values.append(0)
+    
         tokens_chq = cleaned_words(chq)
         tokens_faq = cleaned_words(faq)
         sent_chq=stem_sentence(chq)
@@ -161,20 +163,25 @@ def training_set(tree,x_values,y_values):
         average=(word_overlap+bigram_overlap+jaccard_sim+cosine+lev)/6
         question_length_ratio=len(sent_chq)/len(sent_faq)
         common_nouns=nouns(sent_chq,sent_faq)
-        common_verbs=verbs(sent_chq,sent_faq)
         pair_arr = [word_overlap,bigram_overlap,jaccard_sim,cosine,lev,question_length_ratio,common_nouns,common_verbs,pos_val,similarity]
         x_values.append(pair_arr)
-        print(x_values)
-
+    print(x_values)
+        
+'''
 tree = ET.parse('train.xml')
 y_values = []
 x_values = []
 training_set(tree,x_values,y_values)
 gnb=GaussianNB()
 gnb.fit(x_values,y_values) 
+'''
 x_test = []
 y_test = []
-tree_test = ET.parse('test.xml')
+tree_test = ET.parse('validation.xml')
 training_set(tree_test,x_test,y_test)
+'''
 predicted = gnb.predict(x_test)
 print("Accuracy: ",accuracy_score(predicted,y_test)*100)
+
+print(len(arr))
+'''
